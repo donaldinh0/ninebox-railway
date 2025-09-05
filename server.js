@@ -157,6 +157,124 @@ app.post('/logout', (req, res) => {
 // Rotas de API (mantidas como antes, mas não listadas aqui para brevidade)
 // ... cole aqui todas as suas rotas /api/ que já funcionavam ...
 // Se precisar, eu as envio novamente.
+// R O T A S   D A   A P I
+// ==============================================
+
+// API para o admin buscar todos os usuários (exceto ele mesmo)
+app.get('/api/all-scores', (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    db.query('SELECT id, username, "nineBoxScore", notes FROM users WHERE "isAdmin" = FALSE ORDER BY username ASC', (err, result) => {
+        if (err) {
+            console.error('Erro ao buscar usuários:', err);
+            return res.status(500).send('Erro ao buscar usuários.');
+        }
+        res.json(result.rows);
+    });
+});
+
+// API para o admin atualizar a pontuação e notas de um usuário
+app.post('/api/update-score', (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    const { userId, nineBoxScore, notes } = req.body;
+    db.query('UPDATE users SET "nineBoxScore" = $1, notes = $2 WHERE id = $3 AND "isAdmin" = FALSE', [nineBoxScore, notes, userId], (err) => {
+        if (err) {
+            console.error('Erro ao atualizar pontuação:', err);
+            return res.status(500).send('Erro ao atualizar pontuação.');
+        }
+        res.status(200).send('Pontuação e observações atualizadas com sucesso.');
+    });
+});
+
+// API para o admin criar um novo usuário
+app.post('/api/create-user', async (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).send('Nome de usuário and senha são obrigatórios.');
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+        await db.query('INSERT INTO users (username, password, "isAdmin") VALUES ($1, $2, $3)', [username, hashedPassword, false]);
+        res.status(201).send('Usuário criado com sucesso!');
+    } catch (err) {
+        if (err.code === '23505') { // Código de erro para violação de constraint 'unique'
+            return res.status(409).send('Nome de usuário já existe.');
+        }
+        console.error('Erro ao criar novo usuário:', err);
+        res.status(500).send('Erro ao criar usuário.');
+    }
+});
+
+// API para o admin deletar um usuário
+app.delete('/api/delete-user/:id', (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    const userId = req.params.id;
+    db.query('DELETE FROM users WHERE id = $1 AND "isAdmin" = FALSE', [userId], (err, result) => {
+        if (err) {
+            console.error('Erro ao deletar usuário:', err);
+            return res.status(500).send('Erro ao deletar usuário.');
+        }
+        if (result.rowCount === 0) {
+            return res.status(404).send('Usuário não encontrado ou já deletado.');
+        }
+        res.status(200).send('Usuário deletado com sucesso.');
+    });
+});
+
+// API para o usuário logado buscar sua própria pontuação e notas
+app.get('/api/my-score', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('Não autorizado.');
+    }
+    db.query('SELECT "nineBoxScore", username, notes FROM users WHERE id = $1', [req.session.userId], (err, result) => {
+        if (err || result.rows.length === 0) {
+            console.error('Erro no DB ao buscar pontuação do usuário:', err);
+            return res.status(500).send('Erro ao buscar sua pontuação.');
+        }
+        res.json(result.rows[0]);
+    });
+});
+
+// API para buscar os textos dos boxes do Nine Box (definidos pelo admin)
+app.get('/api/nine-box-texts', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('Não autorizado.');
+    }
+    db.query('SELECT box_texts FROM users WHERE "isAdmin" = TRUE LIMIT 1', (err, result) => {
+        if (err || result.rows.length === 0 || !result.rows[0].box_texts) {
+            console.error('Erro ao buscar textos do Nine Box:', err);
+            // Retorna um objeto vazio como fallback para não quebrar o frontend
+            return res.status(500).json({});
+        }
+        res.json(JSON.parse(result.rows[0].box_texts));
+    });
+});
+
+// API para o admin atualizar os textos dos boxes
+app.post('/api/update-nine-box-texts', (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    const { texts } = req.body;
+    db.query('UPDATE users SET box_texts = $1 WHERE "isAdmin" = TRUE', [JSON.stringify(texts)], (err) => {
+        if (err) {
+            console.error('Erro ao atualizar os textos do Nine Box:', err);
+            return res.status(500).send('Erro ao atualizar os textos.');
+        }
+        res.status(200).send('Textos atualizados com sucesso.');
+    });
+});
+
+
+
 
 // Inicia o servidor
 server.listen(PORT, () => {
