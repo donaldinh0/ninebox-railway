@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Nine Box</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <div class="header-full">
+            <h2>Olá, <span id="user-name"></span>!</h2>
+            <h1 class="ninebox-title">Ninebox</h1>
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-button">Sair</button>
+            </form>
+        </div>
+        
+        <div class="main-content-flex">
+            <div class="score-display">
+                <div id="nine-box-grid" class="nine-box-grid">
+                    <div id="box-7" class="nine-box-item box-7"><span class="box-text">A1 Profissional Enigma</span></div>
+                    <div id="box-8" class="nine-box-item box-8"><span class="box-text">A2 Profissional em Crescimento</span></div>
+                    <div id="box-9" class="nine-box-item box-9"><span class="box-text">A3 Profissional em Destaque</span></div>
+                    
+                    <div id="box-4" class="nine-box-item box-4"><span class="box-text">M1 Questionável</span></div>
+                    <div id="box-5" class="nine-box-item box-5"><span class="box-text">M2 Mantenedor</span></div>
+                    <div id="box-6" class="nine-box-item box-6"><span class="box-text">M3 Forte Desempenho</span></div>
+
+                    <div id="box-1" class="nine-box-item box-1"><span class="box-text">B1 Insuficiente</span></div>
+                    <div id="box-2" class="nine-box-item box-2"><span class="box-text">B2 Eficaz</span></div>
+                    <div id="box-3" class="nine-box-item box-3"><span class="box-text">B3 Comprometido</span></div>
+                </div>
+            </div>
+            
+            <div class="requirements-container">
+                <h3>Critérios de Avaliação</h3>
+                <p>Os seguintes fatores influenciam na sua pontuação Nine Box:</p>
+                <p> - Desempenho -</p>
+                <ul>
+                    <li>Alcance de Metas</li>
+                    <li>Consistência</li>
+                    <li>Qualidade da entrega</li>
+                    <li>Colaboração</li>
+                    <li>Iniciativa e proatividade</li>
+                    <li>Frequência</li>
+                    <li>Pontualidade</li>
+                    <li>Organização do espaço de trabalho</li>
+                    </ul>
+                <p> - Potencial - </p>
+                <ul>
+                    <li>Aprendizado e adaptação</li>
+                    <li>Engajamento e atitude</li>
+                    <li>Criatividade e inovação</li>
+                    <li>Capacidade de resolver problemas</li>
+                    <li>Autonomia</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="current-position-container">
+            <h3>Sua posição atual no Ninebox é:</h3>
+            <p id="nine-box-current-text">Nenhuma posição definida.</p>
+        </div>
+
+        <div class="notes-container">
+            <h3>Observações:</h3>
+            <p id="notes-text">Nenhuma observação no momento.</p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

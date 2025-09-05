@@ -1,0 +1,336 @@
+/* public/style.css */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-body, .dashboard-body, .admin-body {
+    background-color: #e0f2f7;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.login-container, .dashboard-container, .admin-container {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.login-container {
+    max-width: 400px;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 25px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input[type="text"], input[type="password"], input[type="number"], select, textarea {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+button {
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-full {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    margin-bottom: 20px;
+}
+
+.header-full h2, .header-full .logout-button {
+    justify-self: start;
+}
+
+.header-full .logout-button {
+    justify-self: end;
+}
+
+.header h2, .header-full h2, .header-full .ninebox-title {
+    margin: 0;
+}
+
+.ninebox-title {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.logout-button {
+    background-color: #dc3545;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+.score-display p {
+    font-size: 1.2em;
+    margin: 10px 0;
+}
+
+#nine-box-score {
+    font-size: 3em;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.user-list-container {
+    text-align: left;
+    overflow-x: auto;
+}
+
+#user-scores-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#user-scores-table th, #user-scores-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+#user-scores-table th {
+    background-color: #f2f2f2;
+}
+
+#user-scores-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#user-scores-table select, #user-scores-table textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.update-button, .delete-button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin: 2px 0;
+}
+
+.delete-button {
+    background-color: #dc3545;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.create-user-container, .password-change-container, .edit-boxes-container, .notes-container, .current-position-container {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.create-user-container h3, .password-change-container h3 {
+    margin-top: 0;
+}
+
+.create-user-container form {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+}
+
+.password-change-container form {
+    flex-direction: column;
+}
+
+#create-user-message, #cp-message, #password-change-message, #save-texts-message {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* Estilos para o layout de duas colunas */
+.main-content-flex {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.score-display {
+    text-align: center;
+    flex: 2;
+}
+
+.nine-box-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    width: 100%;
+    max-width: 550px; /* Aumenta o tamanho da grade */
+    margin: 20px auto;
+    border: 2px solid #333;
+}
+
+.nine-box-item {
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.1em; /* Aumenta o tamanho da fonte */
+    font-weight: bold;
+    color: white;
+    cursor: default;
+    height: 150px; /* Aumenta a altura das caixas */
+    position: relative;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Estilos para o texto dentro da caixa */
+.nine-box-item .box-text {
+    word-wrap: break-word;
+}
+
+/* Estilos para o modo de edição */
+.nine-box-grid.edit-mode .nine-box-item {
+    padding: 0;
+    height: 120px; /* Alinhado com a nova altura */
+}
+
+.nine-box-grid.edit-mode .nine-box-item textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    resize: none;
+    padding: 5px;
+    font-size: 1.1em; /* Alinhado com o novo tamanho da fonte */
+    box-sizing: border-box;
+}
+
+.nine-box-item.active {
+    outline: 5px solid #2626e6;
+    outline-offset: -5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.box-1 { background-image: linear-gradient(to bottom, #ff160f, #ff5331); }
+.box-2 { background-image: linear-gradient(to bottom, #ff5331, #e49b2d); }
+.box-3 { background-image: linear-gradient(to bottom, #e99431, #b9dd13); }
+.box-4 { background-image: linear-gradient(to bottom, #ff3f25, #f08735); }
+.box-5 { background-image: linear-gradient(to bottom, #f67c3a, #c6cf19); }
+.box-6 { background-image: linear-gradient(to bottom, #d1bc21, #88e90c); }
+.box-7 { background-image: linear-gradient(to bottom, #ff663b, #d8b125); }
+.box-8 { background-image: linear-gradient(to bottom, #dea629, #9fe410); }
+.box-9 { background-image: linear-gradient(to bottom, #a9e111, #4ff704); }
+
+.requirements-container {
+    text-align: left;
+    flex: 1;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid black;
+}
+
+.requirements-container ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+/* NOVO: Estilos para a seção de posição atual e notas */
+.current-position-container {
+     text-align:center; /* Centraliza o texto */
+    margin: 0px 0;
+    padding-right: 450px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #000000;
+
+} 
+
+.notes-container {
+    text-align:left; /* Centraliza o texto */
+    margin: 0px 0;
+    padding-bottom: 0px;
+    border-bottom: 1px solid #000000;
+    white-space: pre-wrap;
+    padding: 0 ;
+}
+
+.notes-container h3 {
+    margin-bottom: 1px;
+}
+
+.notes-container h3,
+.notes-container p {
+    margin:  0;
+    padding: 0;
+}
+
+
+/* Media Query para telas pequenas (ex: celulares) */
+@media (max-width: 768px) {
+    .main-content-flex {
+        flex-direction: column;
+    }
+    .score-display, .requirements-container {
+        flex: auto;
+    }
+    .position-notes-container {
+        flex-direction: column;
+    }
+    .header-full {
+        grid-template-columns: 1fr;
+    }
+    .header-full h2, .header-full .logout-button {
+        justify-self: center;
+        margin-bottom: 10px;
+    }
+    .nine-box-grid {
+        max-width: 100%;
+    }
+}

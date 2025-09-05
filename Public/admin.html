@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Box Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="admin-body">
+    <div class="admin-container">
+        <div class="header">
+            <h2>Painel de Administração Nine Box</h2>
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-button">Sair</button>
+            </form>
+        </div>
+
+        <div class="create-user-container">
+            <h3>Criar Novo Usuário</h3>
+            <form id="create-user-form">
+                <input type="text" id="new-user-username" placeholder="Nome de Usuário" required>
+                <input type="password" id="new-user-password" placeholder="Senha" required>
+                <button type="submit">Criar Usuário</button>
+            </form>
+            <p id="create-user-message"></p>
+        </div>
+        <hr>
+
+        <div class="user-list-container">
+            <h3>Gerenciar Pontuações</h3>
+            <table id="user-scores-table">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Pontuação Atual</th>
+                        <th>Nova Pontuação</th>
+                        <th>Observação</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="user-scores-body">
+                    </tbody>
+            </table>
+            <p id="loading-message">Carregando...</p>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

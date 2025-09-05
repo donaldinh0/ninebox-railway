@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nine Box Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <h2>Login Nine Box</h2>
+        <form id="login-form">
+            <input type="text" name="username" placeholder="Usuário" required>
+            <input type="password" name="password" placeholder="Senha" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <p id="login-message" class="error-message"></p>
+
+        <hr>
+        <button id="show-change-password">Alterar minha senha</button>
+        <div id="password-change-container" style="display: none;">
+            <h3>Alterar Senha</h3>
+            <form id="change-password-form">
+                <input type="text" id="cp-username" placeholder="Nome de Usuário" required>
+                <input type="password" id="cp-current-password" placeholder="Senha Atual" required>
+                <input type="password" id="cp-new-password" placeholder="Nova Senha" required>
+                <input type="password" id="cp-confirm-new-password" placeholder="Confirmar Nova Senha" required>
+                <button type="submit">Alterar Senha</button>
+            </form>
+            <p id="cp-message"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
