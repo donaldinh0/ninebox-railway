@@ -90,6 +90,7 @@ app.post('/login', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         const user = result.rows[0];
+        console.log('Objeto USER recebido do DB:', user);
 
         if (!user) {
             return res.status(400).send('Usuário ou senha inválidos.');
