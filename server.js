@@ -160,6 +160,37 @@ app.post('/logout', (req, res) => {
 // R O T A S   D A   A P I
 // ==============================================
 
+// API para um usuário (logado ou não) alterar a própria senha
+app.post('/api/change-password-login', async (req, res) => {
+    const { username, currentPassword, newPassword } = req.body;
+    
+    if (!username || !currentPassword || !newPassword) {
+        return res.status(400).send('Preencha todos os campos.');
+    }
+
+    try {
+        const result = await db.query('SELECT id, password FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Usuário não encontrado.');
+        }
+
+        const user = result.rows[0];
+        const match = await bcrypt.compare(currentPassword, user.password);
+
+        if (!match) {
+            return res.status(401).send('Senha atual incorreta.');
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        await db.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, user.id]);
+        
+        res.status(200).send('Senha alterada com sucesso!');
+
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err);
+        res.status(500).send('Erro interno ao tentar alterar a senha.');
+    }
+});
 // API para o admin buscar todos os usuários (exceto ele mesmo)
 app.get('/api/all-scores', (req, res) => {
     if (!req.session.isAdmin) {
