@@ -1,6 +1,7 @@
 // server.js - VERSÃO FINAL E CORRIGIDA
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
@@ -83,7 +84,7 @@ app.use(session({
 }));
 
 // Servir arquivos estáticos da pasta 'public'
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Rotas
 app.get('/', (req, res) => {
