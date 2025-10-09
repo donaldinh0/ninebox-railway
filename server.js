@@ -6,6 +6,19 @@ const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session); // Correção da sessão
+const nodemailer = require('nodemailer');
+const crypto = require('crypto'); // Módulo nativo, não precisa instalar
+
+// Configuração do Nodemailer para enviar e-mails
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: false, // true para a porta 465, false para outras como a 587
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -240,6 +253,67 @@ app.post('/api/create-user', async (req, res) => {
         }
         console.error('Erro ao criar novo usuário:', err);
         res.status(500).send('Erro ao criar usuário.');
+    }
+});
+
+// Rota #1: Usuário pede o link de recuperação
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        // 1. Verifica se o usuário existe
+        const userResult = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (userResult.rows.length === 0) {
+            // Por segurança, não revelamos se o e-mail foi encontrado ou não.
+            return res.status(200).send('Se um usuário com este e-mail existir, um link de recuperação foi enviado.');
+        }
+
+        // 2. Gera um token secreto e único
+        const token = crypto.randomBytes(32).toString('hex');
+        const expires_at = new Date(Date.now() + 15 * 60 * 1000); // Token expira em 15 minutos
+
+        // 3. Salva o token no banco de dados
+        await db.query('INSERT INTO password_resets (email, token, expires_at) VALUES ($1, $2, $3)', [email, token, expires_at]);
+
+        // 4. Envia o e-mail para o usuário
+        const resetLink = `${process.env.APP_URL}/reset-password.html?token=${token}`;
+        await transporter.sendMail({
+            from: `"Ninebox App" <${process.env.SMTP_USER}>`,
+            to: email,
+            subject: 'Recuperação de Senha - Ninebox',
+            html: `<p>Olá!</p><p>Você solicitou uma recuperação de senha para sua conta no Ninebox.</p><p>Clique no link abaixo para criar uma nova senha. Este link é válido por 15 minutos.</p><p><a href="${resetLink}" style="font-weight:bold;">Criar Nova Senha</a></p><p>Se você não solicitou isso, pode ignorar este e-mail com segurança.</p>`,
+        });
+
+        res.status(200).send('Se um usuário com este e-mail existir, um link de recuperação foi enviado.');
+    } catch (error) {
+        console.error('Erro em forgot-password:', error);
+        res.status(500).send('Ocorreu um erro interno no servidor.');
+    }
+});
+
+// Rota #2: Usuário envia a nova senha
+app.post('/api/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    try {
+        // 1. Valida o token: ele existe e não expirou?
+        const resetResult = await db.query('SELECT * FROM password_resets WHERE token = $1 AND expires_at > NOW()', [token]);
+        if (resetResult.rows.length === 0) {
+            return res.status(400).send('O link de recuperação é inválido ou já expirou. Por favor, tente novamente.');
+        }
+
+        const { email } = resetResult.rows[0];
+
+        // 2. Criptografa a nova senha e atualiza na tabela de usuários
+        const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        await db.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
+
+        // 3. Deleta o token para que ele não possa ser usado novamente
+        await db.query('DELETE FROM password_resets WHERE token = $1', [token]);
+
+        res.status(200).send('Sua senha foi alterada com sucesso! Você já pode fazer o login.');
+    } catch (error) {
+        console.error('Erro em reset-password:', error);
+        res.status(500).send('Ocorreu um erro interno no servidor.');
     }
 });
 

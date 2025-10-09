@@ -289,3 +289,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// Adiciona a lógica para os novos formulários de senha
+document.addEventListener('DOMContentLoaded', () => {
+    const forgotPasswordForm = document.getElementById('forgot-password-form');
+    const resetPasswordForm = document.getElementById('reset-password-form');
+
+    if (forgotPasswordForm) {
+        const messageEl = forgotPasswordForm.parentElement.querySelector('#message');
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            messageEl.textContent = 'Enviando, aguarde...';
+            messageEl.style.color = '#9ca3af';
+
+            const response = await fetch('/api/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            messageEl.textContent = await response.text();
+            messageEl.style.color = response.ok ? '#22c55e' : '#ef4444'; // Verde para sucesso, vermelho para erro
+        });
+    }
+
+    if (resetPasswordForm) {
+        const messageEl = resetPasswordForm.parentElement.querySelector('#message');
+        // Pega o token da URL da página
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                messageEl.textContent = 'As senhas não coincidem.';
+                messageEl.style.color = '#ef4444';
+                return;
+            }
+
+            messageEl.textContent = 'Salvando nova senha...';
+            messageEl.style.color = '#9ca3af';
+
+            const response = await fetch('/api/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, newPassword })
+            });
+
+            const resultText = await response.text();
+            messageEl.textContent = resultText;
+            messageEl.style.color = response.ok ? '#22c55e' : '#ef4444';
+
+            if (response.ok) {
+                setTimeout(() => window.location.href = '/', 2500); // Redireciona para o login após o sucesso
+            }
+        });
+    }
+});
