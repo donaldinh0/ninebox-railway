@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nine Box Admin</title>
+    <title>Admin - Nine Box</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
 </head>
 <body class="admin-body">
     <div class="admin-container">
         <div class="header">
-            <h2>Painel de Administração Nine Box</h2>
-            <form action="/logout" method="POST">
+            <h2>Painel do Administrador</h2>
+            <form action="/logout" method="POST" class="logout-form">
                 <button type="submit" class="logout-button">Sair</button>
             </form>
         </div>
@@ -19,33 +19,31 @@
         <div class="create-user-container">
             <h3>Criar Novo Usuário</h3>
             <form id="create-user-form">
-                <input type="text" id="new-user-username" placeholder="Nome de Usuário" required>
-                <input type="password" id="new-user-password" placeholder="Senha" required>
-                <button type="submit">Criar Usuário</button>
+                <input type="text" id="new-username" placeholder="Nome de usuário" required>
+                <input type="email" id="new-email" placeholder="E-mail do usuário" required>
+                <input type="password" id="new-password" placeholder="Senha" required>
+                <button type="submit">Criar</button>
             </form>
-            <p id="create-user-message"></p>
+            <div id="create-user-message" style="margin-top: 10px;"></div>
         </div>
-        <hr>
 
         <div class="user-list-container">
-            <h3>Gerenciar Pontuações</h3>
+            <h3>Gerenciar Usuários</h3>
             <table id="user-scores-table">
                 <thead>
                     <tr>
                         <th>Usuário</th>
-                        <th>Pontuação Atual</th>
-                        <th>Nova Pontuação</th>
-                        <th>Observação</th>
-                        <th>Ação</th>
+                        <th>Posição Nine Box</th>
+                        <th>Observações</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="user-scores-body">
                     </tbody>
             </table>
-            <p id="loading-message">Carregando...</p>
         </div>
-
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
