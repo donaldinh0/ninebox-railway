@@ -333,4 +333,110 @@ button:hover {
     .nine-box-grid {
         max-width: 100%;
     }
+
+    /* === ESTILO ELEGANTE E MINIMALISTA PARA LOGIN (SEM IMAGEM) === */
+
+.login-body-elegant {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container-elegant {
+    background: #1f2937;
+    padding: 45px 40px; /* Aumentamos o padding superior para compensar a falta do mascote */
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid #374151;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    color: #f9fafb;
+}
+
+/* O estilo do mascote foi completamente removido */
+
+.login-container-elegant h2 {
+    margin-bottom: 8px;
+    font-size: 2em;
+    font-weight: 600;
+}
+
+.login-subtitle-elegant {
+    margin-bottom: 30px; /* Aumentamos a margem para dar mais respiro ao título */
+    color: #9ca3af;
+}
+
+.input-group-elegant {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group-elegant i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+}
+
+.login-container-elegant input {
+    width: 100%;
+    padding: 14px 14px 14px 45px;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 8px;
+    color: #f9fafb;
+    font-size: 1em;
+    transition: all 0.2s ease-in-out;
+}
+
+.login-container-elegant input::placeholder {
+    color: #6b7280;
+}
+
+.login-container-elegant input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+.login-container-elegant button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3b82f6;
+    color: #ffffff;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+.login-container-elegant button:hover {
+    background-color: #2563eb;
+}
+
+.login-container-elegant button:active {
+    transform: scale(0.98);
+}
+
+.login-footer-elegant {
+    margin-top: 25px;
+}
+
+.login-footer-elegant a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.2s ease-in-out;
+}
+
+.login-footer-elegant a:hover {
+    color: #3b82f6;
+}
 }
