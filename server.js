@@ -204,6 +204,74 @@ app.post('/api/reset-password', async (req, res) => {
     }
 });
 
+// ROTA PARA O USUÁRIO LOGADO BUSCAR SEUS DADOS
+app.get('/api/my-score', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('Não autorizado.');
+    }
+    db.query('SELECT "nineBoxScore", username, notes FROM users WHERE id = $1', [req.session.userId], (err, result) => {
+        if (err || result.rows.length === 0) {
+            console.error('Erro no DB ao buscar pontuação do usuário:', err);
+            return res.status(500).send('Erro ao buscar sua pontuação.');
+        }
+        res.json(result.rows[0]);
+    });
+});
+
+// ROTA PARA BUSCAR OS TEXTOS DOS BOXES (definidos pelo admin)
+app.get('/api/nine-box-texts', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('Não autorizado.');
+    }
+    db.query('SELECT box_texts FROM users WHERE "isAdmin" = TRUE LIMIT 1', (err, result) => {
+        if (err || result.rows.length === 0 || !result.rows[0].box_texts) {
+            console.error('Erro ao buscar textos do Nine Box:', err);
+            return res.status(500).json({});
+        }
+        res.json(JSON.parse(result.rows[0].box_texts));
+    });
+});
+
+// ROTA PARA O ADMIN ATUALIZAR OS TEXTOS DOS BOXES
+app.post('/api/update-nine-box-texts', (req, res) => {
+    if (!req.session.isAdmin) {
+        return res.status(403).send('Acesso negado.');
+    }
+    const { texts } = req.body;
+    db.query('UPDATE users SET box_texts = $1 WHERE "isAdmin" = TRUE', [JSON.stringify(texts)], (err) => {
+        if (err) {
+            console.error('Erro ao atualizar os textos do Nine Box:', err);
+            return res.status(500).send('Erro ao atualizar os textos.');
+        }
+        res.status(200).send('Textos atualizados com sucesso.');
+    });
+});
+
+// ROTA PARA ALTERAR A SENHA A PARTIR DA TELA DE LOGIN
+app.post('/api/change-password-login', async (req, res) => {
+    const { username, currentPassword, newPassword } = req.body;
+    if (!username || !currentPassword || !newPassword) {
+        return res.status(400).send('Preencha todos os campos.');
+    }
+    try {
+        const result = await db.query('SELECT id, password FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(404).send('Usuário não encontrado.');
+        }
+        const user = result.rows[0];
+        const match = await bcrypt.compare(currentPassword, user.password);
+        if (!match) {
+            return res.status(401).send('Senha atual incorreta.');
+        }
+        const hashedNewPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+        await db.query('UPDATE users SET password = $1 WHERE id = $2', [hashedNewPassword, user.id]);
+        res.status(200).send('Senha alterada com sucesso!');
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err);
+        res.status(500).send('Erro interno ao tentar alterar a senha.');
+    }
+});
+
 
 // Inicia o servidor
 server.listen(PORT, () => {
