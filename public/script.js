@@ -1,185 +1,290 @@
+// public/script.js
 document.addEventListener('DOMContentLoaded', () => {
-
-    // --- LÓGICA PARA A PÁGINA DE ADMIN ---
-    const userScoresBody = document.getElementById('user-scores-body');
-    const createUserForm = document.getElementById('create-user-form');
-    
-    // Função para carregar os usuários no painel de admin
-    const loadUsers = async () => {
-        if (!userScoresBody) return;
-        
-        try {
-            const response = await fetch('/api/all-scores');
-            if (!response.ok) throw new Error('Falha ao carregar usuários.');
-            
-            const users = await response.json();
-            userScoresBody.innerHTML = ''; // Limpa a tabela antes de preencher
-
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.username}</td>
-                    <td>
-                        <select class="nine-box-select" data-user-id="${user.id}">
-                            <option value="0" ${user.nineBoxScore == 0 ? 'selected' : ''}>N/A</option>
-                            <option value="1" ${user.nineBoxScore == 1 ? 'selected' : ''}>1 - Insuficiente</option>
-                            <option value="2" ${user.nineBoxScore == 2 ? 'selected' : ''}>2 - Eficaz</option>
-                            <option value="3" ${user.nineBoxScore == 3 ? 'selected' : ''}>3 - Comprometido</option>
-                            <option value="4" ${user.nineBoxScore == 4 ? 'selected' : ''}>4 - Questionável</option>
-                            <option value="5" ${user.nineBoxScore == 5 ? 'selected' : ''}>5 - Mantenedor</option>
-                            <option value="6" ${user.nineBoxScore == 6 ? 'selected' : ''}>6 - Forte Desempenho</option>
-                            <option value="7" ${user.nineBoxScore == 7 ? 'selected' : ''}>7 - Enigma</option>
-                            <option value="8" ${user.nineBoxScore == 8 ? 'selected' : ''}>8 - Em Crescimento</option>
-                            <option value="9" ${user.nineBoxScore == 9 ? 'selected' : ''}>9 - Destaque</option>
-                        </select>
-                    </td>
-                    <td>
-                        <textarea class="notes-textarea" data-user-id="${user.id}" rows="3">${user.notes || ''}</textarea>
-                    </td>
-                    <td>
-                        <button class="update-button" data-user-id="${user.id}">Salvar</button>
-                        <button class="delete-button" data-user-id="${user.id}">Excluir</button>
-                    </td>
-                `;
-                userScoresBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error(error);
-            userScoresBody.innerHTML = '<tr><td colspan="4">Erro ao carregar usuários.</td></tr>';
+    // Funções auxiliares para buscar dados da API
+    async function fetchData(url, options = {}) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(await response.text() || 'Erro na requisição');
         }
-    };
+        return response.json();
+    }
 
-    // Event listener para os botões de Salvar e Excluir
-    if (userScoresBody) {
-        userScoresBody.addEventListener('click', async (e) => {
-            const userId = e.target.dataset.userId;
-            if (!userId) return;
+    async function postData(url, data) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+            throw new Error(await response.text() || 'Erro na requisição');
+        }
+        return response.text();
+    }
 
-            // Ação de SALVAR
-            if (e.target.classList.contains('update-button')) {
-                const select = document.querySelector(`.nine-box-select[data-user-id='${userId}']`);
-                const textarea = document.querySelector(`.notes-textarea[data-user-id='${userId}']`);
-                
-                const response = await fetch('/api/update-score', {
+    // --- Lógica para a página de Login ---
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            try {
+                const response = await fetch('/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: userId,
-                        nineBoxScore: select.value,
-                        notes: textarea.value
-                    })
+                    body: new URLSearchParams(formData)
                 });
-
                 if (response.ok) {
-                    alert('Usuário atualizado com sucesso!');
+                    window.location.href = response.url;
                 } else {
-                    alert('Falha ao atualizar usuário.');
+                    document.getElementById('login-message').textContent = await response.text();
                 }
-            }
-
-            // Ação de EXCLUIR
-            if (e.target.classList.contains('delete-button')) {
-                if (confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
-                    const response = await fetch(`/api/delete-user/${userId}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (response.ok) {
-                        alert('Usuário excluído com sucesso!');
-                        loadUsers(); // Recarrega a lista
-                    } else {
-                        alert('Falha ao excluir usuário.');
-                    }
-                }
+            } catch (err) {
+                document.getElementById('login-message').textContent = err.message;
             }
         });
-    }
 
-    // Event listener para CRIAR usuário
-    if (createUserForm) {
-        createUserForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('new-username').value;
-            const email = document.getElementById('new-email').value;
-            const password = document.getElementById('new-password').value;
-            const messageEl = document.getElementById('create-user-message');
+        const showChangePasswordBtn = document.getElementById('show-change-password');
+        const changePasswordContainer = document.getElementById('password-change-container');
+        const changePasswordForm = document.getElementById('change-password-form');
+        const cpMessage = document.getElementById('cp-message');
 
-            const response = await fetch('/api/create-user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
-            });
-
-            const resultText = await response.text();
-            messageEl.textContent = resultText;
-            messageEl.style.color = response.ok ? 'green' : 'red';
-
-            if (response.ok) {
-                createUserForm.reset();
-                loadUsers(); // Recarrega a lista de usuários
-            }
+        showChangePasswordBtn.addEventListener('click', () => {
+            changePasswordContainer.style.display = changePasswordContainer.style.display === 'none' ? 'block' : 'none';
         });
-    }
 
-    // Carrega os usuários quando a página de admin é aberta
-    if (window.location.pathname.endsWith('/admin') || window.location.pathname.endsWith('/admin.html')) {
-        loadUsers();
-    }
-    
-    // --- LÓGICA PARA AS PÁGINAS DE RECUPERAÇÃO DE SENHA ---
-    const forgotPasswordForm = document.getElementById('forgot-password-form');
-    const resetPasswordForm = document.getElementById('reset-password-form');
-    
-    if (forgotPasswordForm) {
-        const messageEl = forgotPasswordForm.parentElement.querySelector('#message');
-        forgotPasswordForm.addEventListener('submit', async (e) => {
+        changePasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            messageEl.textContent = 'Enviando, aguarde...';
-            messageEl.style.color = '#9ca3af';
+            const username = document.getElementById('cp-username').value;
+            const currentPassword = document.getElementById('cp-current-password').value;
+            const newPassword = document.getElementById('cp-new-password').value;
+            const confirmNewPassword = document.getElementById('cp-confirm-new-password').value;
 
-            const response = await fetch('/api/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-
-            messageEl.textContent = await response.text();
-            messageEl.style.color = response.ok ? '#22c55e' : '#ef4444';
-        });
-    }
-
-    if (resetPasswordForm) {
-        const messageEl = resetPasswordForm.parentElement.querySelector('#message');
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-
-        resetPasswordForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-
-            if (newPassword !== confirmPassword) {
-                messageEl.textContent = 'As senhas não coincidem.';
-                messageEl.style.color = '#ef4444';
+            if (newPassword !== confirmNewPassword) {
+                cpMessage.textContent = 'As novas senhas não coincidem.';
+                cpMessage.style.color = 'red';
                 return;
             }
-            
-            messageEl.textContent = 'Salvando nova senha...';
-            messageEl.style.color = '#9ca3af';
 
-            const response = await fetch('/api/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, newPassword })
+            try {
+                const messageText = await postData('/api/change-password-login', { username, currentPassword, newPassword });
+                cpMessage.textContent = messageText;
+                cpMessage.style.color = 'green';
+                changePasswordForm.reset();
+            } catch (err) {
+                cpMessage.textContent = err.message;
+                cpMessage.style.color = 'red';
+            }
+        });
+    }
+
+    // --- Lógica para a página de Dashboard (Usuário Comum) ---
+    const dashboardContainer = document.querySelector('.dashboard-container');
+    if (dashboardContainer) {
+        const scoreToNineBoxName = {
+            1: "B1 Insuficiente", 2: "B2 Eficaz", 3: "B3 Comprometido",
+            4: "M1 Questionável", 5: "M2 Mantenedor", 6: "M3 Forte Desempenho",
+            7: "A1 Profissional Enigma", 8: "A2 Profissional em Crescimento", 9: "A3 Profissional em Destaque"
+        };
+        
+        async function loadDashboardData() {
+            try {
+                const userData = await fetchData('/api/my-score');
+                document.getElementById('user-name').textContent = userData.username;
+
+                const nineBoxScore = parseInt(userData.nineBoxScore, 10);
+                if (nineBoxScore && nineBoxScore >= 1 && nineBoxScore <= 9) {
+                    const currentBox = document.getElementById(`box-${nineBoxScore}`);
+                    if (currentBox) {
+                        currentBox.classList.add('active');
+                    }
+                    const positionText = document.getElementById('nine-box-current-text');
+                    if (positionText) {
+                        positionText.textContent = scoreToNineBoxName[nineBoxScore];
+                    }
+                } else {
+                    const positionText = document.getElementById('nine-box-current-text');
+                    if (positionText) {
+                        positionText.textContent = 'Nenhuma posição definida.';
+                    }
+                }
+
+                const notesText = document.getElementById('notes-text');
+                if (notesText) {
+                    notesText.textContent = userData.notes || 'Nenhuma observação no momento.';
+                }
+
+            } catch (err) {
+                console.error("Erro ao carregar dados do dashboard:", err);
+                // Exibe mensagens de erro nas seções apropriadas
+            }
+        }
+        
+        loadDashboardData();
+    }
+
+    // --- Lógica para a página de Admin ---
+    const adminContainer = document.querySelector('.admin-container');
+    if (adminContainer) {
+        const scoreToNineBoxName = {
+            1: "B1 Insuficiente", 2: "B2 Eficaz", 3: "B3 Comprometido",
+            4: "M1 Questionável", 5: "M2 Mantenedor", 6: "M3 Forte Desempenho",
+            7: "A1 Profissional Enigma", 8: "A2 Profissional em Crescimento", 9: "A3 Profissional em Destaque"
+        };
+        
+        // Função para carregar os textos do Nine Box para edição
+        async function loadNineBoxTextsForAdmin() {
+            try {
+                const texts = await fetchData('/api/nine-box-texts');
+                for (let i = 1; i <= 9; i++) {
+                    const textarea = document.getElementById(`edit-box-${i}`);
+                    if (textarea) {
+                        textarea.value = texts[String(i)] || '';
+                    }
+                }
+            } catch (err) {
+                console.error("Erro ao carregar textos das caixas:", err);
+            }
+        }
+        
+        // Função para salvar os textos do Nine Box
+        const saveBoxTextsBtn = document.getElementById('save-box-texts');
+        if (saveBoxTextsBtn) {
+            saveBoxTextsBtn.addEventListener('click', async () => {
+                const saveTextsMessage = document.getElementById('save-texts-message');
+                const texts = {};
+                for (let i = 1; i <= 9; i++) {
+                    const textarea = document.getElementById(`edit-box-${i}`);
+                    texts[String(i)] = textarea.value;
+                }
+                
+                try {
+                    const message = await postData('/api/update-nine-box-texts', { texts });
+                    saveTextsMessage.textContent = message;
+                    saveTextsMessage.style.color = 'green';
+                } catch (err) {
+                    saveTextsMessage.textContent = err.message;
+                    saveTextsMessage.style.color = 'red';
+                }
             });
-            
-            const resultText = await response.text();
-            messageEl.textContent = resultText;
-            messageEl.style.color = response.ok ? '#22c55e' : '#ef4444';
+        }
+        
+        function loadScores() {
+            const loadingMessage = document.getElementById('loading-message');
+            loadingMessage.style.display = 'block';
+            loadingMessage.textContent = 'Carregando...';
 
-            if (response.ok) {
-                setTimeout(() => window.location.href = '/', 2500);
+            fetch('/api/all-scores')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error('Não autorizado');
+                    }
+                    return res.json();
+                })
+                .then(users => {
+                    const tableBody = document.getElementById('user-scores-body');
+                    tableBody.innerHTML = '';
+                    if (users && users.length > 0) {
+                        loadingMessage.style.display = 'none';
+                        users.forEach(user => {
+                            const row = document.createElement('tr');
+                            
+                            const selectElement = document.createElement('select');
+                            selectElement.setAttribute('data-user-id', user.id);
+                            for (let i = 1; i <= 9; i++) {
+                                const option = document.createElement('option');
+                                option.value = i;
+                                option.textContent = scoreToNineBoxName[i];
+                                if (i === user.nineBoxScore) {
+                                    option.selected = true;
+                                }
+                                selectElement.appendChild(option);
+                            }
+                            
+                            const notesTextarea = document.createElement('textarea');
+                            notesTextarea.setAttribute('data-user-id', user.id);
+                            notesTextarea.value = user.notes || '';
+
+                            row.innerHTML = `
+                                <td>${user.username}</td>
+                                <td>${scoreToNineBoxName[user.nineBoxScore] || 'N/A'}</td>
+                                <td class="new-score-cell"></td>
+                                <td class="notes-cell"></td>
+                                <td class="action-cell">
+                                    <button class="update-button" data-user-id="${user.id}">Atualizar</button>
+                                    <button class="delete-button" data-user-id="${user.id}">Deletar</button>
+                                </td>
+                            `;
+                            row.querySelector('.new-score-cell').appendChild(selectElement);
+                            row.querySelector('.notes-cell').appendChild(notesTextarea);
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        loadingMessage.textContent = 'Nenhum usuário encontrado.';
+                    }
+
+                    document.querySelectorAll('.update-button').forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const userId = e.target.dataset.userId;
+                            const scoreSelect = document.querySelector(`select[data-user-id="${userId}"]`);
+                            const notesTextarea = document.querySelector(`textarea[data-user-id="${userId}"]`);
+                            
+                            const nineBoxScore = scoreSelect.value;
+                            const notes = notesTextarea.value;
+
+                            try {
+                                const message = await postData('/api/update-score', { userId, nineBoxScore, notes });
+                                alert(message);
+                                loadScores();
+                            } catch (err) {
+                                alert(err.message);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-button').forEach(button => {
+                        button.addEventListener('click', async (e) => {
+                            const userId = e.target.dataset.userId;
+                            if (confirm('Tem certeza que deseja deletar este usuário?')) {
+                                try {
+                                    const response = await fetch(`/api/delete-user/${userId}`, { method: 'DELETE' });
+                                    if (response.ok) {
+                                        alert('Usuário deletado com sucesso!');
+                                        loadScores();
+                                    } else {
+                                        throw new Error(await response.text());
+                                    }
+                                } catch (err) {
+                                    alert(err.message);
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(err => {
+                    console.error("Erro ao carregar a lista de usuários:", err);
+                    loadingMessage.textContent = 'Erro ao carregar os dados.';
+                });
+        }
+        
+        loadScores();
+        loadNineBoxTextsForAdmin();
+
+        const createUserForm = document.getElementById('create-user-form');
+        const createUserMessage = document.getElementById('create-user-message');
+
+        createUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('new-user-username').value;
+            const password = document.getElementById('new-user-password').value;
+
+            try {
+                const messageText = await postData('/api/create-user', { username, password });
+                createUserMessage.textContent = messageText;
+                createUserMessage.style.color = 'green';
+                createUserForm.reset();
+                loadScores();
+            } catch (err) {
+                createUserMessage.textContent = err.message;
+                createUserMessage.style.color = 'red';
             }
         });
     }
